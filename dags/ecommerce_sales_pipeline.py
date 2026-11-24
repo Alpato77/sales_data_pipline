@@ -2,10 +2,15 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from scripts.extract import extract_sales
 from scripts.validates import validate_sales
 from scripts.transform import transform_sales
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+EXTRACTED_FILE = str(PROJECT_ROOT / "data" / "processed" / "extracted_sales.csv")
 
 
 default_args = {
@@ -16,16 +21,15 @@ default_args = {
 
 
 def check_data_availability():
-    import os
-
-    if not os.path.exists("data/raw/sales.csv"):
-        raise FileNotFoundError("sales.csv not found!")
+    sales_file = PROJECT_ROOT / "data" / "raw" / "sales.csv"
+    if not sales_file.is_file():
+        raise FileNotFoundError(f"sales.csv not found: {sales_file}")
 
     print("Sales data is available.")
 
 
 with DAG(
-    dag_id='ecommerce_sales_pipeline',
+    dag_id='hello_myfirst_pipline',
     default_args=default_args,
     description='E-commerce Sales ETL Pipeline',
     start_date=datetime(2026, 11, 24),
@@ -46,13 +50,13 @@ with DAG(
     task3 = PythonOperator(
         task_id='validate_sales',
         python_callable=validate_sales,
-        op_args=["data/processed/extracted_sales.csv"]
+        op_args=[EXTRACTED_FILE]
     )
 
     task4 = PythonOperator(
         task_id='transform_sales',
         python_callable=transform_sales,
-        op_args=["data/processed/extracted_sales.csv"]
+        op_args=[EXTRACTED_FILE]
     )
 
     task5 = PythonOperator(
