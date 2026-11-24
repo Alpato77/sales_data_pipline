@@ -1,16 +1,18 @@
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from scripts.extract import extract_sales
 from scripts.validates import validate_sales
 from scripts.transform import transform_sales
+from scripts.load import load_sales
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXTRACTED_FILE = str(PROJECT_ROOT / "data" / "processed" / "extracted_sales.csv")
+TRANSFORMED_FILE = str(PROJECT_ROOT / "data" / "processed" / "transformed_sales.csv")
 
 
 default_args = {
@@ -61,7 +63,8 @@ with DAG(
 
     task5 = PythonOperator(
         task_id='load_sales',
-        python_callable=lambda: print("Loading sales into PostgreSQL")
+        python_callable=load_sales,
+        op_args=[TRANSFORMED_FILE]
     )
 
     task1 >> task2 >> task3 >> task4 >> task5
