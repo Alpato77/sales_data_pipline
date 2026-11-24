@@ -3,8 +3,11 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 
+from scripts.extract import extract_sales
+from scripts.validates import validate_sales
+from scripts.transform import transform_sales
 
-# Default arguments
+
 default_args = {
     'owner': 'Imad',
     'retries': 3,
@@ -12,28 +15,15 @@ default_args = {
 }
 
 
-# Task functions
 def check_data_availability():
-    print("Checking sales data availability")
+    import os
+
+    if not os.path.exists("data/raw/sales.csv"):
+        raise FileNotFoundError("sales.csv not found!")
+
+    print("Sales data is available.")
 
 
-def extract_sales():
-    print("Extracting sales data")
-
-
-def validate_sales():
-    print("Validating sales data")
-
-
-def transform_sales():
-    print("Transforming sales data")
-
-
-def load_sales():
-    print("Loading sales into PostgreSQL")
-
-
-# DAG definition
 with DAG(
     dag_id='ecommerce_sales_pipeline',
     default_args=default_args,
@@ -55,18 +45,19 @@ with DAG(
 
     task3 = PythonOperator(
         task_id='validate_sales',
-        python_callable=validate_sales
+        python_callable=validate_sales,
+        op_args=["data/processed/extracted_sales.csv"]
     )
 
     task4 = PythonOperator(
         task_id='transform_sales',
-        python_callable=transform_sales
+        python_callable=transform_sales,
+        op_args=["data/processed/extracted_sales.csv"]
     )
 
     task5 = PythonOperator(
         task_id='load_sales',
-        python_callable=load_sales
+        python_callable=lambda: print("Loading sales into PostgreSQL")
     )
 
-    # Task dependencies
     task1 >> task2 >> task3 >> task4 >> task5

@@ -1,12 +1,14 @@
 
+
 import pandas as pd
 
 
 def extract_sales():
 
-    # Extract sales data from CSV
     df = pd.read_csv("data/raw/sales.csv")
 
-    print(f"Successfully extracted {len(df)} rows.")
+    df.to_csv("data/processed/extracted_sales.csv", index=False)
 
-    return df
+    print(f"Extracted {len(df)} rows.")
+
+    return "data/processed/extracted_sales.csv"

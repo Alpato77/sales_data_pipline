@@ -1,18 +1,21 @@
 
-def validate_sales(df):
 
-    # Check missing customer IDs
+import pandas as pd
+
+
+def validate_sales(file_path):
+
+    df = pd.read_csv(file_path)
+
     if df["customer_id"].isnull().any():
-        print("WARNING: Missing customer_id values detected!")
+        print("WARNING: Missing customer_id detected!")
 
-    # Check duplicate order IDs
     if df["order_id"].duplicated().any():
-        print("WARNING: Duplicate order_id values detected!")
+        print("WARNING: Duplicate order_id detected!")
 
-    # Check negative quantities
     if (df["quantity"] < 0).any():
         print("WARNING: Negative quantities detected!")
 
     print("Validation completed.")
 
-    return df
+    return file_path
