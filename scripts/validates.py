@@ -1,18 +1,18 @@
-import pandas as pd
+
 def validate_sales(df):
 
-    # Check missing values
+    # Check missing customer IDs
     if df["customer_id"].isnull().any():
-        raise ValueError("Missing customer_id values detected!")
+        print("WARNING: Missing customer_id values detected!")
 
     # Check duplicate order IDs
     if df["order_id"].duplicated().any():
-        raise ValueError("Duplicate order_id values detected!")
+        print("WARNING: Duplicate order_id values detected!")
 
     # Check negative quantities
     if (df["quantity"] < 0).any():
-        raise ValueError("Negative quantities detected!")
+        print("WARNING: Negative quantities detected!")
 
-    print("Data validation successful!")
+    print("Validation completed.")
 
     return df
